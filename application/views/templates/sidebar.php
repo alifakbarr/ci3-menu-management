@@ -11,31 +11,53 @@
 
     <!-- Divider -->
     <hr class="sidebar-divider">
-    <div class="sidebar-heading">
-        Administrator
-    </div>
-    <!-- Nav Item - Dashboard -->
-    <li class="nav-item">
-        <a class="nav-link" href="index.html">
-            <i class="fas fa-fw fa-tachometer-alt"></i>
-            <span>Dashboard</span></a>
-    </li>
-    <div class="sidebar-heading">
-        User
-    </div>
-    <!-- Nav Item - Dashboard -->
-    <li class="nav-item">
-        <a class="nav-link" href="index.html">
-            <i class="fa fa-user" aria-hidden="true"></i>
-            <span>My Profile</span></a>
-    </li>
-    <!-- Divider -->
-    <hr class="sidebar-divider d-none d-md-block">
 
-    <!-- Sidebar Toggler (Sidebar) -->
-    <div class="text-center d-none d-md-inline">
-        <button class="rounded-circle border-0" id="sidebarToggle"></button>
-    </div>
+    <!-- query menu -->
+    <?php
+    $role_id = $this->session->userdata('role_id');
+    $queryMenu = "
+        select user_menu.id, menu
+        from user_menu join user_access_menu
+        on user_menu.id = user_access_menu.menu_id
+        where user_access_menu.role_id = $role_id
+        order by user_access_menu.menu_id asc
+    ";
+
+    $menu = $this->db->query($queryMenu)->result_array();
+    ?>
+
+    <!-- Looping Menu -->
+    <?php foreach ($menu as $m) { ?>
+        <div class="sidebar-heading">
+            <?= $m['menu'] ?>
+        </div>
+        <!-- siapkan sub-menu sesuai menu -->
+        <?php
+        $menuId = $m['id'];
+        $querySubMenu = "
+            select * from user_sub_menu where menu_id = $menuId and is_active = 1
+        ";
+        $subMenu = $this->db->query($querySubMenu)->result_array();
+        ?>
+
+        <?php foreach ($subMenu as $sm) { ?>
+            <?php if ($title == $sm['title']) { ?>
+                <li class="nav-item active">
+                <?php } else { ?>
+                <li class="nav-item">
+                <?php } ?>
+                <a class="nav-link" href="<?= base_url($sm['url']) ?>">
+                    <i class="<?= $sm['icon'] ?>"></i>
+                    <span><?= $sm['title'] ?></span></a>
+                </li>
+            <?php } ?>
+            <hr class="sidebar-divider">
+        <?php } ?>
+        <!-- Divider -->
+        <!-- Sidebar Toggler (Sidebar) -->
+        <div class="text-center d-none d-md-inline">
+            <button class="rounded-circle border-0" id="sidebarToggle"></button>
+        </div>
 
 </ul>
 <!-- End of Sidebar -->
